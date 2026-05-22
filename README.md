@@ -25,7 +25,7 @@ Most existing platforms lack:
 
 ### Backend & Authentication Flow
 
-![Backend Architecture](images/BACKEND_ARCHITECTURE.png)
+![Backend Architecture](images/BACKEND_Architecture.png)
 
 ---
 
