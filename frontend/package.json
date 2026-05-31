@@ -1,0 +1,53 @@
+{
+  "name": "medflow-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-toast": "^1.2.15",
+    "@tanstack/react-query": "^5.89.0",
+    "@tanstack/react-table": "^8.21.3",
+    "autoprefixer": "^10.5.0",
+    "axios": "^1.9.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^0.525.0",
+    "next": "16.2.6",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "react-dropzone": "^14.4.1",
+    "react-hook-form": "^7.55.0",
+    "react-markdown": "^10.1.0",
+    "react-media-recorder": "^1.7.2",
+    "react-pdf": "^9.2.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^3.4.19",
+    "zod": "^3.24.3",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "postcss": "^8.5.15",
+    "typescript": "^5"
+  }
+}
