@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import timedelta, datetime, timezone
 from pydantic import BaseModel
@@ -10,11 +11,14 @@ from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from enum import Enum
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-SECRET_KEY = "6cd6cbb2d5bb7a70105456d74e3affc2a8378c5c5faac08e1d5329e4dbb8cd78"
-ALGORITHM = "HS256"
+SECRET_KEY = os.getenv["SECRET_KEY"]
+ALGORITHM = os.getenv["ALGORITHM"]
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
@@ -26,6 +30,7 @@ class RoleEnum(str, Enum):
     patient = "patient"
     finance = "finance"
     admin = "admin"
+    registration = "registration"
 
 
 class CreateUserRequest(BaseModel):
