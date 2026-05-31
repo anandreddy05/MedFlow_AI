@@ -10,7 +10,7 @@ class MedicalRetriever:
     def __init__(self, client: QdrantClient, embedder: MedicalEmbedder):
         print("Initializing Hybrid Medical Retriever...")
 
-        self.client = client  
+        self.client = client
         self.embedder = embedder
         self.collection_name = "medical_documents"
         self.embedder = MedicalEmbedder()
@@ -19,7 +19,13 @@ class MedicalRetriever:
         print("Loading FastEmbed Cross-Encoder Reranker...")
         self.reranker = TextCrossEncoder(model_name="BAAI/bge-reranker-base")
 
-    def retrieve(self, query: str, patient_id: str, limit: int = 20):
+    def retrieve(
+        self,
+        query: str,
+        patient_id: str,
+        collection_name: str = "medical_documents",
+        limit: int = 20,
+    ):
         """
         Executes a secure Hybrid Search (Dense + BM25) for a specific patient.
         """
@@ -53,7 +59,7 @@ class MedicalRetriever:
 
         # 3. Execute the Hybrid Prefetch Query with RRF Fusion
         initial_results = self.client.query_points(
-            collection_name=self.collection_name,
+            collection_name=collection_name,
             prefetch=[
                 # Search 1: Semantic Meaning (Dense)
                 models.Prefetch(
