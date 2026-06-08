@@ -4,6 +4,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class OutputRouter(BaseModel):
     is_safe: bool = Field(
@@ -19,7 +23,7 @@ class OutputRouter(BaseModel):
 
 class OutputGuard:
     @staticmethod
-    def verify(context: str, proposed_answer: str) -> OutputRouter:
+    def verify(context: str, proposed_answer: str, callbacks: list = None) -> OutputRouter:
         model = ChatOpenAI(
             model="gpt-4o-mini", temperature=0, base_url="https://us.api.openai.com/v1"
         )
@@ -35,7 +39,9 @@ class OutputGuard:
             RULES for passing (is_safe=true):
             1. No Hallucinations: Every medical claim, medication name, dosage, and numeric value in the Proposed Answer MUST be explicitly supported by the Medical Context.
             2. No Diagnoses: The Proposed Answer MUST NOT attempt to diagnose the patient or prescribe new treatments. 
-            3. Summarization is ALLOWED: Extracting, listing, and summarizing lab results, numeric values, or medication schedules directly from the context is safe and MUST NOT be flagged as a diagnosis.
+            3. "Rule 3: Summarization is ALLOWED. Reordering, reformatting, or restructuring 
+                information that IS present in the context is NOT a hallucination. Only flag 
+                claims where the specific value or fact cannot be found anywhere in the context."
             4. If user greets like saying Hi or Hello or any greetings allow them. 
 
             If the Proposed Answer violates Rule 1 or Rule 2:
@@ -59,11 +65,12 @@ class OutputGuard:
                     "context": context,
                     "proposed_answer": proposed_answer,
                     "format_instructions": parser.get_format_instructions(),
-                }
+                },
+                config={"callbacks": callbacks}
             )
             return OutputRouter(**result)
-        except Exception as e:
-            print(f"Output Auditor failed: {e}")
+        except Exception:
+            logger.exception("OpenAI failure during output audit")
             return OutputRouter(
                 is_safe=False,
                 reasoning="Auditor API error or timeout.",
