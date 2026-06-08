@@ -1,0 +1,388 @@
+[
+  {
+    "question": "What is the required timeline for charge capture after service delivery according to the finance policy?",
+    "ground_truth": "All billable services must be captured within 24 hours of service delivery. Each department must submit charges daily. Late charges (beyond 48 hours) require supervisor approval.",
+    "category": "Revenue Cycle Management",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What must the coding team verify for CPT coding compliance?",
+    "ground_truth": "The coding team must verify: Medical necessity documentation exists, Procedure matches diagnosis code, Modifiers are correctly applied, No unbundling of services.",
+    "category": "Coding & Documentation",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "To what level must all diagnoses be coded under ICD-10?",
+    "ground_truth": "All diagnoses must be coded to the highest level of specificity.",
+    "category": "Coding & Documentation",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Who must clearly document the principal diagnosis?",
+    "ground_truth": "Principal diagnosis must be clearly documented by the attending physician.",
+    "category": "Coding & Documentation",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Which services require prior authorization according to the finance policy?",
+    "ground_truth": "The following services require prior authorization: All inpatient admissions, MRI, CT, PET scans, Surgeries and interventional procedures, Expensive medications (> $1,000 per dose), Outpatient physical therapy beyond 12 visits.",
+    "category": "Authorization & Verification",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the insurance verification timeline for scheduled services?",
+    "ground_truth": "Insurance verification must be completed at least 48 hours before scheduled services.",
+    "category": "Authorization & Verification",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "When must insurance verification occur for emergency admissions?",
+    "ground_truth": "For emergency admissions, verification must occur within 24 hours of admission.",
+    "category": "Authorization & Verification",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What discount do uninsured patients receive on all hospital services?",
+    "ground_truth": "Uninsured patients receive a 35% discount on all hospital services.",
+    "category": "Patient Financial Services",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What payment plan terms are available for uninsured patients with bills under $5,000?",
+    "ground_truth": "Up to 12 months for bills under $5,000",
+    "category": "Patient Financial Services",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the Medicare timely filing limit from date of service?",
+    "ground_truth": "Medicare timely filing limit: 12 months from date of service",
+    "category": "Government Payors",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Is balance billing allowed for Medicare patients?",
+    "ground_truth": "No balance billing allowed for Medicare patients",
+    "category": "Government Payors",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the Medicaid timely filing limit from date of service?",
+    "ground_truth": "Timely filing limit: 6 months from date of service",
+    "category": "Government Payors",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the maximum copayment per visit for Medicaid patients?",
+    "ground_truth": "Copayments cannot exceed $3 per visit",
+    "category": "Government Payors",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "For dual eligible patients (Medicare and Medicaid), which program pays first?",
+    "ground_truth": "Medicare pays first",
+    "category": "Government Payors",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What out-of-pocket amount does a dual eligible patient owe?",
+    "ground_truth": "Patient owes $0 out-of-pocket",
+    "category": "Government Payors",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What self-pay discount is available if paid in full within 30 days?",
+    "ground_truth": "35% discount if paid in full within 30 days",
+    "category": "Patient Financial Services",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the minimum monthly payment calculation for payment plans?",
+    "ground_truth": "Minimum monthly payment calculation: Total bill ÷ 12 months",
+    "category": "Patient Financial Services",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the grace period for missed payments before an account is sent to collections?",
+    "ground_truth": "Missed payments: 30-day grace period, then account sent to collections",
+    "category": "Collections & Refunds",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "On what day is an account sent to an external collections agency according to the collections process?",
+    "ground_truth": "Day 120: Account sent to external collections agency",
+    "category": "Collections & Refunds",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Within how many days must refunds be processed after an insurance payment creates a credit balance?",
+    "ground_truth": "Refunds must be processed within 30 days of: Insurance payment that creates credit balance",
+    "category": "Collections & Refunds",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What level of approval is required for adjustments between $5,001 and $25,000?",
+    "ground_truth": "$5,001 -$25,000: Finance Director",
+    "category": "Financial Controls",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Who must approve adjustments over $25,000?",
+    "ground_truth": "Over $25,000: CFO",
+    "category": "Financial Controls",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the internal audit schedule for monthly audits?",
+    "ground_truth": "Monthly: Random sample of 50 claims",
+    "category": "Audit & Compliance",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the penalty for false claim submission according to the finance policy?",
+    "ground_truth": "False claim submission: $10,000+ per claim",
+    "category": "Audit & Compliance",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the penalty for upcoding?",
+    "ground_truth": "Upcoding: Triple damages + exclusion",
+    "category": "Audit & Compliance",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the compliance hotline number provided in the finance policy?",
+    "ground_truth": "Anonymous reporting hotline: 1-800-555-COMPLY",
+    "category": "Audit & Compliance",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the target for Days in Accounts Receivable?",
+    "ground_truth": "Days in accounts receivable (target: < 45 days)",
+    "category": "Financial Reporting",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the target denial rate by payer?",
+    "ground_truth": "Denial rate by payer (target: < 5%)",
+    "category": "Financial Reporting",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Within how many days must new hires complete required compliance training?",
+    "ground_truth": "New hire: Complete within 30 days",
+    "category": "Training & Education",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the effective date of the finance policy that supersedes all previous financial policies?",
+    "ground_truth": "This policy supersedes all previous financial policies effective January 1, 2024.",
+    "category": "Policy Administration",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "According to the HHS-OIG General Compliance Program Guidance, what does the Federal anti-kickback statute prohibit?",
+    "ground_truth": "The Federal anti-kickback statute prohibits entities involved in Federal health care program business from engaging in some practices that are common in other business sectors, such as offering or receiving gifts to reward past or future referrals.",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the maximum fine for violation of the Federal anti-kickback statute?",
+    "ground_truth": "Violation of the Federal anti-kickback statute constitutes a felony punishable by a maximum fine of $100,000",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the Physician Self-Referral Law also known as?",
+    "ground_truth": "The Federal physician self-referral (PSL) law, also known as the 'Stark law'",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Is the Physician Self-Referral Law a strict liability statute?",
+    "ground_truth": "The PSL is a strict-liability statute, which means proof of intent to violate the law is not required.",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Under the False Claims Act, how is 'knowing' or 'knowingly' defined?",
+    "ground_truth": "The False Claims Act defines 'knowing' and 'knowingly' to mean that 'a person, with respect to information- (i) has actual knowledge of the information; (ii) acts in deliberate ignorance of the truth or falsity of the information; or (iii) acts in reckless disregard of the truth or falsity of the information; and ... no proof of specific intent to defraud is required.'",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What potential liability can result from filing false claims under the False Claims Act?",
+    "ground_truth": "Filing false claims may result in liability of up to three times the programs' loss plus an additional penalty per claim filed.",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the deadline to report and repay overpayments to Medicare and Medicaid under the Affordable Care Act?",
+    "ground_truth": "The Affordable Care Act included a requirement that entities must report and repay overpayments to Medicare and Medicaid by the later of: '(A) the date which is 60 days after the date on which the overpayment was identified; or (B) the date any corresponding cost report is due, if applicable.'",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the maximum penalty per violation for improper kickback conduct under the Civil Monetary Penalties Law?",
+    "ground_truth": "improper kickback conduct results in penalties of up to $100,000 per violation",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What does the Beneficiary Inducements CMP prohibit?",
+    "ground_truth": "The Beneficiary Inducements CMP provides for the imposition of CMPs against any person who offers or transfers remuneration to a Medicare or State health care program that the person knows or should know is likely to influence the beneficiary's selection of a particular provider, practitioner, or supplier for the order or receipt of any item or service for which payment may be made, in whole or in part, by Medicare or a State health care program.",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the current OIG interpretation of 'nominal in value' for the Beneficiary Inducements CMP?",
+    "ground_truth": "OIG has determined that incentives that are only nominal in value are not prohibited by the Beneficiary Inducements CMP and currently interprets 'nominal in value' to mean no more than $15 per item or $75 in the aggregate on an annual basis.",
+    "category": "Fraud & Abuse Laws",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the maximum penalty for information blocking by a health IT developer?",
+    "ground_truth": "A health IT developer of certified health IT, health information exchange, or network that engages in information blocking may be subject to CMPs of up to $1 million per violation.",
+    "category": "Health IT & Privacy",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What are mandatory exclusions from Federal health care programs based on?",
+    "ground_truth": "OIG is required by law to exclude from participation in all Federal health care programs individuals and entities convicted of certain types of criminal offenses, including: offenses related to the delivery of an item or service under Medicare or a State health care program; patient abuse or neglect; felony convictions for other health care-related fraud, theft, embezzlement, breach of fiduciary responsibility, or other financial misconduct; and felony convictions relating to the unlawful manufacture, distribution, prescription, or dispensing of controlled substances.",
+    "category": "Exclusions & Sanctions",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the effect of an OIG exclusion on Federal health care program payments?",
+    "ground_truth": "The effect of an OIG exclusion is that no Federal health care program payment may be made for any items or services furnished: (1) by an excluded person, or (2) at the medical direction or on the prescription of an excluded person.",
+    "category": "Exclusions & Sanctions",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "How often does OIG update the List of Excluded Individuals/Entities (LEIE)?",
+    "ground_truth": "OIG updates the LEIE monthly",
+    "category": "Exclusions & Sanctions",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What are the seven elements of an effective compliance program according to OIG?",
+    "ground_truth": "1. Written Policies and Procedures, 2. Compliance Leadership and Oversight, 3. Training and Education, 4. Effective Lines of Communication with the Compliance Officer and Disclosure Program, 5. Enforcing Standards: Consequences and Incentives, 6. Risk Assessment, Auditing, and Monitoring, 7. Responding to Detected Offenses and Developing Corrective Action Initiatives.",
+    "category": "Compliance Program Infrastructure",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "To whom should the compliance officer report according to OIG guidance?",
+    "ground_truth": "The compliance officer should report either to the CEO with direct and independent access to the board or to the board directly.",
+    "category": "Compliance Program Infrastructure",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "Should the compliance officer be responsible for the delivery of health care items and services or billing?",
+    "ground_truth": "The compliance officer should not be responsible, either directly or indirectly, for the delivery of health care items and services or billing, coding, or claim submission.",
+    "category": "Compliance Program Infrastructure",
+    "difficulty": "medium",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "How often should the Compliance Committee meet according to OIG?",
+    "ground_truth": "The Compliance Committee should meet no less than quarterly.",
+    "category": "Compliance Program Infrastructure",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "How often should compliance risk assessments be conducted according to OIG?",
+    "ground_truth": "Periodic compliance risk assessments should be a component of an entity's compliance program and should be conducted at least annually.",
+    "category": "Risk Assessment",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the deadline to notify appropriate Government authority after discovery of credible evidence of misconduct?",
+    "ground_truth": "If credible evidence of misconduct from any source is discovered and, after a reasonable inquiry, the compliance officer or counsel has reason to believe that the misconduct may violate criminal, civil, or administrative law, then the entity should promptly (not more than 60 days after the determination that credible evidence of a violation exists) notify the appropriate Government authority of the misconduct.",
+    "category": "Reporting & Investigation",
+    "difficulty": "hard",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What level of approval is required for adjustments up to $500?",
+    "ground_truth": "Up to $500: Billing Supervisor",
+    "category": "Financial Controls",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What level of approval is required for adjustments between $501 and $5,000?",
+    "ground_truth": "$501 - $5,000: Finance Manager",
+    "category": "Financial Controls",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the penalty for no medical necessity documentation?",
+    "ground_truth": "No medical necessity documentation: Claim denial + audit flag",
+    "category": "Audit & Compliance",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the penalty for balance billing violation?",
+    "ground_truth": "Balance billing violation: Fine + patient refund",
+    "category": "Audit & Compliance",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  },
+  {
+    "question": "What is the self-pay discount with payment plan agreement?",
+    "ground_truth": "20% discount with payment plan agreement",
+    "category": "Patient Financial Services",
+    "difficulty": "easy",
+    "collection": "finance_compliance"
+  }
+  
+]
