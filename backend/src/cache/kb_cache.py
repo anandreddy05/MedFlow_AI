@@ -55,3 +55,4 @@ class KnowledgeBaseCache:
 
 
 kb_cache = KnowledgeBaseCache()
+

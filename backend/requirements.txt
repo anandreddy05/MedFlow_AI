@@ -22,3 +22,4 @@ pypdf
 pytest
 prometheus-fastapi-instrumentator
 redis
+upstash_redis
