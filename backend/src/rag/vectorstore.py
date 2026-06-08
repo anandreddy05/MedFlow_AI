@@ -104,6 +104,12 @@ class QdrantVectorStore:
                 field_schema=models.PayloadSchemaType.INTEGER,
             )
 
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="document_id",
+                field_schema=models.PayloadSchemaType.KEYWORD,
+            )
+
             logger.info(
                 "Qdrant collection created",
                 extra=log_ctx(collection=self.collection_name),
@@ -136,9 +142,47 @@ class QdrantVectorStore:
                 "created_at",
                 models.PayloadSchemaType.INTEGER,
             )
+            self.client.create_payload_index(
+                self.knowledge_collection,
+                "document_id",
+                models.PayloadSchemaType.KEYWORD,
+            )
             logger.info(
                 "Qdrant collection created",
                 extra=log_ctx(collection=self.knowledge_collection),
+            )
+
+        self._ensure_payload_index(
+            self.knowledge_collection, "document_id", models.PayloadSchemaType.KEYWORD
+        )
+        self._ensure_payload_index(
+            self.collection_name, "document_id", models.PayloadSchemaType.KEYWORD
+        )
+
+    def _ensure_payload_index(
+        self, collection_name: str, field_name: str, field_schema: models.PayloadSchemaType
+    ) -> None:
+        """Create a payload index if missing (required by Qdrant Cloud for filters)."""
+        if not self.client.collection_exists(collection_name):
+            return
+        try:
+            self.client.create_payload_index(
+                collection_name=collection_name,
+                field_name=field_name,
+                field_schema=field_schema,
+            )
+            logger.info(
+                "Payload index ensured",
+                extra=log_ctx(collection=collection_name, field=field_name),
+            )
+        except Exception as e:
+            logger.warning(
+                "Payload index creation skipped",
+                extra=log_ctx(
+                    collection=collection_name,
+                    field=field_name,
+                    error=str(e),
+                ),
             )
 
     # ============================================================
@@ -568,12 +612,20 @@ class QdrantVectorStore:
             )
 
         # Upload to Qdrant
-        self.client.upsert(collection_name=target_collection, points=points)
-        logger.info(
-            "Document ingestion completed",
-            extra=log_ctx(
-                document_id=document_id,
-                target_collection=target_collection,
-                chunk_count=len(points),
-            ),
-        )
+        batch_size = 50
+
+        for i in range(0, len(points), batch_size):
+            batch = points[i:i + batch_size]
+
+            self.client.upsert(
+                collection_name=target_collection,
+                points=batch,
+            )
+
+            logger.info(
+                f"Uploaded batch {(i // batch_size) + 1}",
+                extra=log_ctx(
+                    uploaded=len(batch),
+                    total=len(points),
+                ),
+            )

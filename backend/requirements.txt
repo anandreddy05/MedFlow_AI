@@ -2,13 +2,10 @@ langchain
 langchain-openai
 langchain-qdrant
 docling
-torch
-torchvision
 python-dotenv
 python-multipart
 fastapi
 uvicorn
-streamlit
 sqlalchemy 
 alembic
 passlib
@@ -17,7 +14,6 @@ python-jose[cryptography]
 fastembed
 qdrant-client
 langchain_text_splitters
-sentence-transformers
 ragas
 pymupdf
 langfuse

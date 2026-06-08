@@ -1,0 +1,17 @@
+__pycache__/
+.pytest_cache/
+
+.venv/
+venv/
+
+.git/
+.env
+
+medflow.db
+testdb.db
+
+storage/
+extraction_logs/
+
+tests/
+evaluations/
