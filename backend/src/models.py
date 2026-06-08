@@ -10,17 +10,34 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(
-        Enum("doctor", "nurse", "patient", "finance", "admin", name="user_roles"),
+        Enum("doctor", "nurse", "patient", "finance", "admin", "registration", name="user_roles"),  
         nullable=False,
-    )  # doctor, nnurse, patient, finance, admin,
+    )
     full_name = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+    must_change_password = Column(Boolean, default=False)  
 
     audit_logs = relationship("AuditLog", back_populates="user")
     patient_profile = relationship("Patient", back_populates="user", uselist=False)
+
+class DoctorPatientAssignment(Base):
+    """Links doctors to their patients"""
+    __tablename__ = "doctor_patient_assignments"
+    
+    id = Column(Integer, primary_key=True)
+    doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    patient_id = Column(String, ForeignKey("patients.patient_id"), nullable=False)
+    assigned_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    is_primary = Column(Boolean, default=True)  # Primary care doctor
+    status = Column(String, default="active")  # active, transferred, discharged
+    
+    # Relationships
+    doctor = relationship("User", foreign_keys=[doctor_id])
+    patient = relationship("Patient")
+
 
 
 class Patient(Base):
@@ -44,6 +61,14 @@ class Patient(Base):
 
     # Relationships
     user = relationship("User", back_populates="patient_profile")
+
+    assigned_doctors = relationship(
+        "DoctorPatientAssignment",
+        back_populates="patient",
+        foreign_keys=[DoctorPatientAssignment.patient_id]
+    )
+
+
 
 
 class AuditLog(Base):
