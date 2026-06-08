@@ -74,13 +74,6 @@ export default function LoginPage() {
                         {isLoading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
-
-                <div className="mt-6 text-center text-xs text-gray-500">
-                    <p>Demo accounts:</p>
-                    <p className="mt-1">admin@hospital.com / admin123</p>
-                    <p>doctor: doc@hospital.com / (your password)</p>
-                    <p>registration: reg1@hospital.com / 12345</p>
-                </div>
             </div>
         </div>
     );

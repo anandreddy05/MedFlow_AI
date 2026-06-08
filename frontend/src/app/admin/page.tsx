@@ -115,7 +115,7 @@ export default function AdminDashboard() {
               Manage Users
             </button>
             <button
-              onClick={() => router.push('/admin/audit-logs')}
+              onClick={() => router.push('/admin/logs')}
               className="w-full text-left px-4 py-2 bg-gray-50 rounded-lg hover:bg-gray-100"
             >
               View Full Audit Log

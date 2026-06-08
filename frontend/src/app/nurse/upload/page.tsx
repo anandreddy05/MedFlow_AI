@@ -33,7 +33,7 @@ export default function NurseUploadPage() {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail || 'Upload failed');
+      throw new Error(error.detail || error.error || 'Upload failed');
     }
     return response.json();
   };

@@ -13,7 +13,6 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { useReactMediaRecorder } from 'react-media-recorder';
 
 interface Patient {
   patient_id: string;
@@ -34,6 +33,8 @@ interface Document {
   data: any;
   created_at: string;
   approval_status?: string;
+  content_markdown?: string;  
+  original_file_path?: string;
 }
 
 interface ChatMessage {
@@ -53,11 +54,26 @@ interface Source {
 interface Medication {
   id: string;
   name: string;
-  dosage: string;
-  timing: string[];
-  foodInstruction: string;
-  duration: string;
+  strength: string;
+  duration: number | '';
+  durationUnit: string;
+  timings: string[];
+  foodTiming: string;
+  quantityPerDose: number | '';
+  notes: string;
 }
+
+const DEFAULT_MEDICATION: Medication = {
+  id: '1', 
+  name: '', 
+  strength: '', 
+  duration: '', 
+  durationUnit: 'days', 
+  timings: [], 
+  foodTiming: 'before_food', 
+  quantityPerDose: 1, 
+  notes: ''
+};
 
 export default function DoctorDashboard() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -75,43 +91,65 @@ export default function DoctorDashboard() {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [instructions, setInstructions] = useState('');
-  const [medications, setMedications] = useState<Medication[]>([
-    { id: '1', name: '', dosage: '', timing: [], foodInstruction: 'before', duration: '' }
-  ]);
+  const [medications, setMedications] = useState<Medication[]>([{...DEFAULT_MEDICATION}]);
   const [isSaving, setIsSaving] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
 
-  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [dictationStatus, setDictationStatus] = useState<'idle' | 'recording'>('idle');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
 
-  const { status: dictationStatus, startRecording: startDictation, stopRecording: stopDictation } = useReactMediaRecorder({ 
-    audio: true,
-    onStop: async (blobUrl, blob) => {
-      setIsTranscribing(true);
-      try {
-        const token = localStorage.getItem('access_token');
-        const formData = new FormData();
-        formData.append('audio', blob, 'dictation.webm');
+  const startDictation = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
 
-        const response = await fetch('http://127.0.0.1:8000/doctor/transcribe', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setIsTranscribing(true);
+        try {
+          const token = localStorage.getItem('access_token');
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'dictation.webm');
 
-        if (response.ok) {
-          const data = await response.json();
-          // Appends the new text to whatever the doctor already typed!
-          setInstructions(prev => prev + (prev ? " " : "") + data.transcription);
-        } else {
-            console.error("Transcription API returned an error.");
+          const response = await fetch('http://127.0.0.1:8000/doctor/transcribe', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setInstructions(prev => prev + (prev ? " " : "") + data.transcription);
+          }
+        } catch (error) {
+          console.error("Dictation failed:", error);
+        } finally {
+          setIsTranscribing(false);
         }
-      } catch (error) {
-        console.error("Dictation failed:", error);
-      } finally {
-        setIsTranscribing(false);
-      }
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setDictationStatus('recording');
+    } catch (err) {
+      console.error("Microphone access error:", err);
+      alert("Could not access microphone. Please allow microphone permissions in your browser.");
     }
-  });
+  };
+
+  const stopDictation = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setDictationStatus('idle');
+    }
+  };
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -152,7 +190,7 @@ export default function DoctorDashboard() {
     setActiveTab('overview');
     setShowSidebar(false);
     setInstructions('');
-    setMedications([{ id: '1', name: '', dosage: '', timing: [], foodInstruction: 'before', duration: '' }]);
+    setMedications([{...DEFAULT_MEDICATION, id: Date.now().toString()}]);
   };
 
   const toggleSidebar = () => {
@@ -228,12 +266,8 @@ export default function DoctorDashboard() {
   };
 
   const addMedication = () => {
-    setMedications([
-      ...medications,
-      { id: Date.now().toString(), name: '', dosage: '', timing: [], foodInstruction: 'before', duration: '' }
-    ]);
+    setMedications([...medications, { ...DEFAULT_MEDICATION, id: Date.now().toString() }]);
   };
-
   const removeMedication = (id: string) => {
     if (medications.length === 1) return;
     setMedications(medications.filter(m => m.id !== id));
@@ -245,64 +279,86 @@ export default function DoctorDashboard() {
     ));
   };
 
-  const toggleTiming = (id: string, timing: string) => {
-    setMedications(medications.map(m => {
-      if (m.id === id) {
-        const timings = m.timing.includes(timing)
-          ? m.timing.filter(t => t !== timing)
-          : [...m.timing, timing];
-        return { ...m, timing: timings };
-      }
-      return m;
-    }));
-  };
-
+  const toggleTiming = (id: string, selectedTiming: string) => {
+    setMedications(prevMeds => 
+        prevMeds.map(med => {
+            if (med.id === id) {
+                const currentTimings = med.timings || [];
+                const updatedTimings = currentTimings.includes(selectedTiming)
+                    ? currentTimings.filter(t => t !== selectedTiming)
+                    : [...currentTimings, selectedTiming];
+                return { ...med, timings: updatedTimings };
+            }
+            return med;
+        })
+    );
+};
   const handleSavePrescription = async () => {
     if (!selectedPatient) return;
     
+    // ✅ Filter and validate medications
+    const validMedications = medications
+        .filter(m => m.name.trim() !== '' && m.strength.trim() !== '') // Require both name AND strength
+        .map(m => ({
+            name: m.name.trim(),
+            strength: m.strength.trim(),
+            duration: Number(m.duration) || 7,
+            durationUnit: m.durationUnit || 'days',
+            timings: m.timings || [],
+            foodTiming: m.foodTiming || 'before_food',
+            quantityPerDose: String(m.quantityPerDose || 1),
+            notes: m.notes || ''
+        }));
+    
+    if (validMedications.length === 0) {
+        alert('Please add at least one medication with name and strength');
+        return;
+    }
+    
     setIsSaving(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const payload = {
-        patient_id: selectedPatient.patient_id,
-        doctor_id: user.id,
-        instructions: instructions,
-        medications: medications.filter(m => m.name.trim()).map(m => ({
-          medicine_name: m.name,
-          dosage: m.dosage,
-          timing: m.timing[0] || 'morning',
-          food_instruction: m.foodInstruction,
-          frequency: 'daily'
-        }))
-      };
-
-      const response = await fetch('http://127.0.0.1:8000/prescriptions/direct', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        const payload = {
+            patient_id: selectedPatient.patient_id,
+            doctor_id: String(user.id),
+            instructions: instructions || "Follow structured medication plan.",
+            medications: validMedications
+        };
+        
+        console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Debug
+        
+        const response = await fetch('http://127.0.0.1:8000/prescriptions/direct', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Server error:', error);
+            alert('Failed to save prescription: ' + JSON.stringify(error.detail || error));
+            return;
+        }
+        
+        const data = await response.json();
         alert('Prescription saved successfully!');
         await fetchPatientDocuments(selectedPatient.patient_id);
         setActiveTab('prescriptions');
         setInstructions('');
-        setMedications([{ id: '1', name: '', dosage: '', timing: [], foodInstruction: 'before', duration: '' }]);
-      } else {
-        const error = await response.json();
-        alert('Failed to save prescription: ' + error.detail);
-      }
+        setMedications([{ ...DEFAULT_MEDICATION, id: Date.now().toString() }]);
+        
     } catch (error) {
-      console.error('Error saving prescription:', error);
-      alert('Failed to save prescription');
+        console.error('Error saving prescription:', error);
+        alert('Failed to save prescription: ' + (error.message || 'Unknown error'));
     } finally {
-      setIsSaving(false);
+        setIsSaving(false);
     }
-  };
+};
 
   const calculateAge = (dob: string) => {
     if (!dob) return 'N/A';
@@ -602,19 +658,19 @@ export default function DoctorDashboard() {
                             </div>
                             <span className="text-xs text-gray-400">{formatDate(doc.created_at)}</span>
                           </div>
-                          {doc.data?.medications && (
-                            <div className="space-y-2 bg-gray-50 rounded-lg p-3">
+                          {doc.data?.medications && doc.data.medications.length > 0 && (
+                          <div className="space-y-2 bg-gray-50 rounded-lg p-3">
                               {doc.data.medications.map((med: any, idx: number) => (
-                                <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
-                                  <div className="flex items-center gap-2">
-                                    <Pill className="w-3 h-3 text-green-500" />
-                                    <span className="font-medium text-gray-800">{med.medicine_name}</span>
+                                  <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
+                                      <div className="flex items-center gap-2">
+                                          <Pill className="w-3 h-3 text-green-500" />
+                                          <span className="font-medium text-gray-800">{med.name || med.medicine_name}</span>
+                                      </div>
+                                      <span className="text-sm text-gray-500">{med.strength || med.dosage}</span>
                                   </div>
-                                  <span className="text-sm text-gray-500">{med.dosage}</span>
-                                </div>
                               ))}
-                            </div>
-                          )}
+                          </div>
+                      )}
                         </div>
                       ))
                     )}
@@ -675,48 +731,89 @@ export default function DoctorDashboard() {
                       <div className="space-y-4">
                         {medications.map((med, idx) => (
                           <div key={med.id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-200 transition-all">
-                            <div className="flex justify-between items-start mb-3">
-                              <span className="text-sm font-medium text-gray-500">Medication #{idx + 1}</span>
-                              {medications.length > 1 && (
-                                <button onClick={() => removeMedication(med.id)} className="text-red-400 hover:text-red-600">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                              <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Medicine Name & Dose</label>
+                            <div className="grid grid-cols-12 gap-4 mb-4">
+                              <div className="col-span-5">
+                                <label className="text-xs text-gray-500 mb-1 block">Medicine Name</label>
                                 <input
                                   type="text"
                                   value={med.name}
                                   onChange={(e) => updateMedication(med.id, 'name', e.target.value)}
-                                  placeholder="e.g., Paracetamol 650mg"
+                                  placeholder="e.g., Paracetamol"
                                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 />
                               </div>
-                              <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Duration</label>
+                              <div className="col-span-4">
+                                <label className="text-xs text-gray-500 mb-1 block">Strength</label>
                                 <input
                                   type="text"
-                                  value={med.duration}
-                                  onChange={(e) => updateMedication(med.id, 'duration', e.target.value)}
-                                  placeholder="e.g., 7 days"
+                                  value={med.strength}
+                                  onChange={(e) => updateMedication(med.id, 'strength', e.target.value)}
+                                  placeholder="e.g., 500 mg"
+                                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="col-span-3">
+                                <label className="text-xs text-gray-500 mb-1 block">Qty / Dose</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={med.quantityPerDose}
+                                  onChange={(e) => updateMedication(med.id, 'quantityPerDose', parseInt(e.target.value) || '')}
+                                  placeholder="1"
+                                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-12 gap-4 mb-4">
+                              <div className="col-span-5 flex gap-2">
+                                <div className="flex-1">
+                                    <label className="text-xs text-gray-500 mb-1 block">Duration</label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={med.duration}
+                                      onChange={(e) => updateMedication(med.id, 'duration', parseInt(e.target.value) || '')}
+                                      placeholder="7"
+                                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-xs text-gray-500 mb-1 block">Unit</label>
+                                    <select
+                                      value={med.durationUnit}
+                                      onChange={(e) => updateMedication(med.id, 'durationUnit', e.target.value)}
+                                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+                                    >
+                                      <option value="days">Days</option>
+                                      <option value="weeks">Weeks</option>
+                                      <option value="months">Months</option>
+                                    </select>
+                                </div>
+                              </div>
+                              <div className="col-span-7">
+                                <label className="text-xs text-gray-500 mb-1 block">Special Notes</label>
+                                <input
+                                  type="text"
+                                  value={med.notes}
+                                  onChange={(e) => updateMedication(med.id, 'notes', e.target.value)}
+                                  placeholder="e.g., Take with plenty of water"
                                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg"
                                 />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-50">
                               <div>
                                 <label className="text-xs text-gray-500 mb-2 block">Timing</label>
                                 <div className="flex flex-wrap gap-3">
-                                  {timingOptions.map((t) => (
-                                    <label key={t} className="flex items-center gap-1.5">
+                                  {['Morning', 'Afternoon', 'Evening', 'Night'].map((t) => (
+                                    <label key={t} className="flex items-center gap-1.5 cursor-pointer">
                                       <input
                                         type="checkbox"
-                                        checked={med.timing.includes(t)}
-                                        onChange={() => toggleTiming(med.id, t)}
-                                        className="w-4 h-4 text-blue-600 rounded"
+                                        checked={med.timings.includes(t.toLowerCase())}
+                                        onChange={() => toggleTiming(med.id, t.toLowerCase())}
+                                        className="w-4 h-4 text-blue-600 rounded border-gray-300"
                                       />
                                       <span className="text-sm text-gray-600">{t}</span>
                                     </label>
@@ -726,18 +823,21 @@ export default function DoctorDashboard() {
                               <div>
                                 <label className="text-xs text-gray-500 mb-2 block">With Food</label>
                                 <div className="flex flex-wrap gap-3">
-                                  {foodOptions.map((f) => (
-                                    <label key={f} className="flex items-center gap-1.5">
-                                      <input
-                                        type="radio"
-                                        name={`food-${med.id}`}
-                                        checked={med.foodInstruction === f.toLowerCase().replace(' ', '_')}
-                                        onChange={() => updateMedication(med.id, 'foodInstruction', f.toLowerCase().replace(' ', '_'))}
-                                        className="w-4 h-4 text-blue-600"
-                                      />
-                                      <span className="text-sm text-gray-600">{f}</span>
-                                    </label>
-                                  ))}
+                                  {['Before Food', 'After Food', 'With Food', 'Independent'].map((f) => {
+                                    const val = f.toLowerCase().replace(' ', '_');
+                                    return (
+                                      <label key={f} className="flex items-center gap-1.5 cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          name={`food-${med.id}`}
+                                          checked={med.foodTiming === val}
+                                          onChange={() => updateMedication(med.id, 'foodTiming', val)}
+                                          className="w-4 h-4 text-blue-600 border-gray-300"
+                                        />
+                                        <span className="text-sm text-gray-600">{f}</span>
+                                      </label>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
@@ -952,10 +1052,10 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {/* Document Viewer Modal */}
-      {showDocumentModal && selectedDocument && (
+            {/* Document Viewer Modal */}
+            {showDocumentModal && selectedDocument && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center p-5 border-b">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -968,19 +1068,41 @@ export default function DoctorDashboard() {
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
+            
             <div className="flex-1 overflow-y-auto p-6">
-              <pre className="text-sm bg-gray-50 p-5 rounded-xl overflow-auto">
-                {JSON.stringify(selectedDocument.data, null, 2)}
-              </pre>
+              {selectedDocument.content_markdown ? (
+                <div className="prose prose-sm max-w-none bg-gray-50 p-5 rounded-xl">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {selectedDocument.content_markdown}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <pre className="text-sm bg-gray-50 p-5 rounded-xl overflow-auto">
+                  {JSON.stringify(selectedDocument.data, null, 2)}
+                </pre>
+              )}
             </div>
-            <div className="p-5 border-t flex justify-end">
-              <button onClick={() => setShowDocumentModal(false)} className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition">
+            
+            <div className="p-5 border-t flex justify-between items-center">
+              {selectedDocument.original_file_path && selectedDocument.original_file_path !== "direct_entry" && (
+                <a 
+                  href={`http://127.0.0.1:8000/documents/${selectedDocument.document_id}/file`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition flex items-center gap-2 text-sm"
+                >
+                  <FileText className="w-4 h-4" />
+                  View Original Document
+                </a>
+              )}
+              <button onClick={() => setShowDocumentModal(false)} className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition ml-auto">
                 Close
               </button>
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
+    </div>  
+  );  
+}  
+
