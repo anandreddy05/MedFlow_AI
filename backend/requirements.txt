@@ -2,6 +2,8 @@ langchain
 langchain-openai
 langchain-qdrant
 docling
+torch
+torchvision
 python-dotenv
 python-multipart
 fastapi
@@ -19,3 +21,8 @@ sentence-transformers
 ragas
 pymupdf
 langfuse
+rapidfuzz
+pypdf
+pytest
+prometheus-fastapi-instrumentator
+redis
