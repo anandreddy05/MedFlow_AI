@@ -1,41 +1,55 @@
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from fastembed.rerank.cross_encoder import TextCrossEncoder
+from langfuse import observe
 
+from src.utils.logger import get_logger, log_ctx, timed_log
 from .embedder import MedicalEmbedder
 from .optimizer import QueryOptimizer
+
+logger = get_logger(__name__)
 
 
 class MedicalRetriever:
     def __init__(self, client: QdrantClient, embedder: MedicalEmbedder):
-        print("Initializing Hybrid Medical Retriever...")
+        logger.info("Initializing Hybrid Medical Retriever")
 
         self.client = client
         self.embedder = embedder
         self.collection_name = "medical_documents"
-        self.embedder = MedicalEmbedder()
         self.optimizer = QueryOptimizer()
 
-        print("Loading FastEmbed Cross-Encoder Reranker...")
+        logger.info("Loading FastEmbed Cross-Encoder Reranker")
         self.reranker = TextCrossEncoder(model_name="BAAI/bge-reranker-base")
 
+    @observe(as_type="span", name="Qdrant_Hybrid_Search")
+    @timed_log(logger, "qdrant_retrieval")
     def retrieve(
         self,
         query: str,
         patient_id: str,
         collection_name: str = "medical_documents",
-        limit: int = 20,
+        retrieval_k: int = 50,
+        report_type: str = None,
+        final_k: int = 15,
     ):
         """
         Executes a secure Hybrid Search (Dense + BM25) for a specific patient.
         """
 
         expansion_terms = self.optimizer.expand_query(query)
-        search_query = f"{query} {expansion_terms}".strip()
+        search_query = f"{query} \n{expansion_terms}".strip()
 
-        print("\n--- RAG PIPELINE ---")
-        print(f"Original Query (For Reranker + Retriver): {query}")
-        print(f"Combined Query (For Qdrant):   {search_query}\n")
+        logger.info(
+            "Qdrant retrieval query",
+            extra=log_ctx(
+                query=query,
+                patient_id=patient_id,
+                collection_name=collection_name,
+                report_type=report_type,
+                search_query=search_query,
+            ),
+        )
 
         # 1. Generate both vectors using your custom local embedder
         dense_vector = self.embedder.embed_text(query)
@@ -47,42 +61,61 @@ class MedicalRetriever:
         )
 
         # 2. Build the strict RBAC / Data Isolation Filter
-        # This guarantees the AI can never retrieve another patient's data
-        security_filter = models.Filter(
-            must=[
+        filter_conditions = []
+
+        # Always filter by patient_id for medical_documents (RBAC)
+        if collection_name == "medical_documents":
+            filter_conditions.append(
                 models.FieldCondition(
                     key="patient_id",
                     match=models.MatchValue(value=patient_id),
                 )
-            ]
-        )
+            )
+
+        # For knowledge_base, scope by report_type to avoid cross-contamination
+        if collection_name == "knowledge_base" and report_type:
+            filter_conditions.append(
+                models.FieldCondition(
+                    key="report_type",
+                    match=models.MatchValue(value=report_type),
+                )
+            )
+
+        security_filter = models.Filter(must=filter_conditions)
 
         # 3. Execute the Hybrid Prefetch Query with RRF Fusion
         initial_results = self.client.query_points(
             collection_name=collection_name,
             prefetch=[
-                # Search 1: Semantic Meaning (Dense)
                 models.Prefetch(
                     query=dense_vector,
                     using="dense",
-                    limit=limit,
+                    limit=retrieval_k,
                     filter=security_filter,
                 ),
-                # Search 2: Exact Medical Keywords (Sparse/BM25)
                 models.Prefetch(
                     query=sparse_vector,
                     using="sparse",
-                    limit=limit,
+                    limit=retrieval_k,
                     filter=security_filter,
                 ),
             ],
-            # Fuse the two lists together using Reciprocal Rank Fusion
             query=models.FusionQuery(fusion=models.Fusion.RRF),
-            limit=limit,
+            limit=retrieval_k,
         )
-        if not initial_results.points:
-            return "No medical records found for this query."
 
+        if not initial_results.points:
+            logger.warning(
+                "Qdrant retrieval returned no results",
+                extra=log_ctx(
+                    query=query,
+                    patient_id=patient_id,
+                    collection_name=collection_name,
+                ),
+            )
+            return []
+
+        # 4. Extract for Reranker
         documents = []
         chunk_texts = []
 
@@ -90,16 +123,20 @@ class MedicalRetriever:
             text = point.payload.get("content_markdown", "")
             documents.append(point)
             chunk_texts.append(text)
-        new_scores = list(self.reranker.rerank(query, chunk_texts))
 
+        # 5. Get true semantic scores from Cross-Encoder
+        new_scores = list(self.reranker.rerank(query, chunk_texts))
         scored_documents = list(zip(documents, new_scores))
-        scored_documents.sort(key=lambda x: x[1], reverse=True)
+
+        final_scored_documents = [
+            (doc, float(score)) for doc, score in scored_documents
+        ]
+
+        final_scored_documents.sort(key=lambda x: x[1], reverse=True)
 
         retrieved_docs = []
-
-        for best_point, score in scored_documents[:limit]:
+        for best_point, score in final_scored_documents[:final_k]:
             payload = best_point.payload
-
             retrieved_docs.append(
                 {
                     "content": payload.get("content_markdown", ""),
@@ -111,8 +148,19 @@ class MedicalRetriever:
                         "source_file": payload.get("source_file"),
                         "chunk_id": payload.get("chunk_id"),
                         "page": payload.get("page"),
+                        "created_at": payload.get("created_at"),
                     },
                 }
             )
+
+        logger.info(
+            "Qdrant retrieval completed",
+            extra=log_ctx(
+                query=query,
+                patient_id=patient_id,
+                collection_name=collection_name,
+                result_count=len(retrieved_docs),
+            ),
+        )
 
         return retrieved_docs
