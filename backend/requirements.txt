@@ -17,7 +17,6 @@ langchain_text_splitters
 ragas
 pymupdf
 langfuse
-rapidfuzz
 pypdf
 pytest
 prometheus-fastapi-instrumentator
