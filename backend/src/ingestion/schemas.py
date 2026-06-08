@@ -82,11 +82,22 @@ class StructuredMedication(BaseModel):
     frequency: Literal["daily", "weekly", "as_needed"]
 
 
+class MedicationItem(BaseModel):
+    name: str
+    strength: str
+    duration: int
+    durationUnit: str
+    timings: List[str]
+    foodTiming: str
+    quantityPerDose: str
+    notes: Optional[str] = ""
+
+
 class DirectPrescriptionPayload(BaseModel):
     patient_id: str
-    doctor_id: str
+    doctor_id: int
     instructions: Optional[str] = "Follow structured medication plan."
-    medications: List[StructuredMedication]
+    medications: List[MedicationItem]
 
 
 class ChatMessage(BaseModel):
@@ -98,3 +109,4 @@ class ChatRequest(BaseModel):
     session_id: Optional[str] = None
     query: str
     history: List[ChatMessage] = []
+    patient_id: Optional[str] = None

@@ -4,7 +4,10 @@ from .extractors.cbc_extractor import CBCExtractor
 from .extractors.digital_prescription_extractor import DigitalPrescriptionExtractor
 from .extractors.discharge_summary_extractor import DischargeSummaryExtractor
 from .extractors.medical_invoice_extractor import MedicalInvoiceExtractor
+from langfuse import observe
 
+
+@observe(as_type="span", name="PDF_Markdown_Extraction")
 class BaseExtractor:
     def get_extractor(self, report_type: str):
         if report_type == "cbc":
