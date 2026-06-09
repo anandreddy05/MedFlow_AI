@@ -38,7 +38,6 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-
 @router.post("/prescriptions/direct")
 async def create_direct_prescription(
     user: user_dependency,

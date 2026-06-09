@@ -300,7 +300,9 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
                 {"role": "user", "content": anchored_query},
             ]
 
-            final_answer = _invoke_llm(model, messages_for_llm, callbacks=[get_handler()])
+            final_answer = _invoke_llm(
+                model, messages_for_llm, callbacks=[get_handler()]
+            )
 
             logger.debug(
                 "Raw LLM output before auditor",
@@ -480,7 +482,7 @@ async def voice_question(
         target_collection = "knowledge_base"
         target_report_type = "general_health"
         active_system_prompt = GENERAL_HEALTH_SYSTEM_PROMPT
-    
+
     if target_collection == "knowledge_base":
         cached_answer = kb_cache.get(
             query=user_query,

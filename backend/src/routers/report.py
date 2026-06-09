@@ -43,9 +43,6 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-
-
-
 @router.post("/upload", tags=["Documents"])
 async def upload_medical_report(
     user: user_dependency,
@@ -342,4 +339,3 @@ async def approve_report(
             ),
         )
         raise HTTPException(status_code=500, detail=str(e))
-
