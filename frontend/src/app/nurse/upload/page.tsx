@@ -11,12 +11,25 @@ const reportTypes = [
   { value: 'medical_invoice', label: 'Medical Invoice' },
 ];
 
+type UploadStatus = 'uploading' | 'success' | 'error';
+
+interface FileUpload {
+  file: File;
+  preview: string;
+  patientId: string;
+  reportType: string;
+  status: UploadStatus;
+  progress: number;
+  documentId?: string;
+  error?: string;
+}
+
 export default function NurseUploadPage() {
-  const [uploads, setUploads] = useState([]);
+  const [uploads, setUploads] = useState<FileUpload[]>([]);
   const [selectedPatient, setSelectedPatient] = useState('');
   const [selectedReportType, setSelectedReportType] = useState('cbc');
 
-  const uploadDocument = async (file, patientId, reportType) => {
+  const uploadDocument = async (file: File, patientId: string, reportType: string) => {
     const token = localStorage.getItem('access_token');
     const formData = new FormData();
     formData.append('file', file);
@@ -38,8 +51,8 @@ export default function NurseUploadPage() {
     return response.json();
   };
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const newUploads = acceptedFiles.map(file => ({
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newUploads: FileUpload[] = acceptedFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
       patientId: selectedPatient,
@@ -60,7 +73,7 @@ export default function NurseUploadPage() {
     },
   });
 
-  const handleUpload = async (upload) => {
+  const handleUpload = async (upload: FileUpload) => {
     if (!upload.patientId) {
       setUploads(prev => prev.map(u => 
         u.file === upload.file ? { ...u, status: 'error', error: 'Patient ID required' } : u
@@ -78,16 +91,16 @@ export default function NurseUploadPage() {
       ));
     } catch (error) {
       setUploads(prev => prev.map(u => 
-        u.file === upload.file ? { ...u, status: 'error', error: error.message } : u
+        u.file === upload.file ? { ...u, status: 'error', error: error instanceof Error ? error.message : 'Upload failed' } : u
       ));
     }
   };
 
-  const removeUpload = (file) => {
+  const removeUpload = (file: File) => {
     setUploads(prev => prev.filter(u => u.file !== file));
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: UploadStatus) => {
     if (status === 'uploading') return <Loader2 className="w-4 h-4 animate-spin text-blue-600" />;
     if (status === 'success') return <CheckCircle className="w-4 h-4 text-green-600" />;
     if (status === 'error') return <AlertCircle className="w-4 h-4 text-red-600" />;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { 
   ArrowLeft, 
   Check, 
@@ -31,7 +31,7 @@ const mockDocument = {
   }
 };
 
-export default function NurseReviewPage() {
+function NurseReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const documentId = searchParams.get('id') || '1';
@@ -192,5 +192,19 @@ export default function NurseReviewPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NurseReviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-gray-500">Loading review...</p>
+        </div>
+      }
+    >
+      <NurseReviewContent />
+    </Suspense>
   );
 }

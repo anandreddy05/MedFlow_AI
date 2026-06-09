@@ -164,7 +164,7 @@ export default function NurseReviewPage() {
   }
 
   const isCBC = document.report_type === 'cbc';
-  const results = editedData?.results || [];
+  const results: CBCResult[] = editedData?.results || [];
 
   return (
     <div className="h-screen bg-gray-100 overflow-hidden">

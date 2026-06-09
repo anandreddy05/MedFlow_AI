@@ -11,7 +11,13 @@ export default function RegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [doctors, setDoctors] = useState([]);
+  interface DoctorOption {
+    doctor_id: number;
+    full_name: string;
+    email: string;
+  }
+
+  const [doctors, setDoctors] = useState<DoctorOption[]>([]);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -65,8 +71,7 @@ export default function RegistrationPage() {
     fetchDoctors();
   }, [formData.role]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -143,13 +148,13 @@ export default function RegistrationPage() {
       }, 3000);
   
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updateField = (field, value) => {
+  const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

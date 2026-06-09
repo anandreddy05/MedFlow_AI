@@ -354,7 +354,7 @@ export default function DoctorDashboard() {
         
     } catch (error) {
         console.error('Error saving prescription:', error);
-        alert('Failed to save prescription: ' + (error.message || 'Unknown error'));
+        alert('Failed to save prescription: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
         setIsSaving(false);
     }

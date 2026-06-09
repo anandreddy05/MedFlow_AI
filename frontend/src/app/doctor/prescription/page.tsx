@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   ArrowLeft, Save, FileText, Pill, Clock, 
@@ -26,7 +26,7 @@ interface PreviousPrescription {
   instructions: string;
 }
 
-export default function WritePrescriptionPage() {
+function WritePrescriptionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patient');
@@ -367,12 +367,12 @@ export default function WritePrescriptionPage() {
                         {prescription.medications.map((med, idx) => (
                           <div key={idx} className="flex items-center justify-between text-sm py-1 border-b border-gray-100">
                             <div>
-                              <span className="font-medium">{med.medicine_name}</span>
+                              <span className="font-medium">{med.name}</span>
                               <span className="text-gray-500 ml-2">{med.dosage}</span>
                             </div>
                             <div className="flex gap-3 text-xs text-gray-500">
-                              <span className="capitalize">{med.timing}</span>
-                              <span className="capitalize">{med.food_instruction?.replace('_', ' ')}</span>
+                              <span className="capitalize">{Array.isArray(med.timing) ? med.timing.join(', ') : med.timing}</span>
+                              <span className="capitalize">{med.foodInstruction?.replace('_', ' ')}</span>
                             </div>
                           </div>
                         ))}
@@ -392,5 +392,19 @@ export default function WritePrescriptionPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WritePrescriptionPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-gray-500">Loading prescription...</p>
+        </div>
+      }
+    >
+      <WritePrescriptionContent />
+    </Suspense>
   );
 }

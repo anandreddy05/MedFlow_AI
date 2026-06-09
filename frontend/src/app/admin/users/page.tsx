@@ -1,10 +1,19 @@
 'use client';
 
+import React from "react";
 import { useState, useEffect } from 'react';
-import { UserPlus, Users, Search, Edit, Trash2, Shield, Stethoscope, Briefcase, Building, User } from 'lucide-react';
+import { UserPlus, Edit, Trash2, Shield, Stethoscope, Briefcase, Building, User } from 'lucide-react';
+
+interface AdminUser {
+  id: number;
+  email: string;
+  full_name: string;
+  role: string;
+  created_at: string;
+}
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,7 +53,9 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleCreateUser = async (e) => {
+  const handleCreateUser = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     setMessage('');
     
@@ -74,13 +85,13 @@ export default function AdminUsersPage() {
     }
   };
 
-  const getRoleIcon = (role) => {
+  const getRoleIcon = (role: string) => {
     const r = roles.find(r => r.value === role);
     if (r) return r.icon;
     return User;
   };
 
-  const getRoleColor = (role) => {
+  const getRoleColor = (role: string) => {
     const r = roles.find(r => r.value === role);
     return r?.color || 'gray';
   };
