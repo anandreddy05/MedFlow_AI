@@ -1,4 +1,3 @@
-from docling.document_converter import DocumentConverter
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
@@ -20,6 +19,8 @@ class MedicalInvoiceExtractor:
     """
 
     def __init__(self):
+        from docling.document_converter import DocumentConverter
+
         self.converter = DocumentConverter()
         self.llm = ChatOpenAI(
             model="gpt-4o-mini", temperature=0, base_url="https://us.api.openai.com/v1"

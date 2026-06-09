@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 
-from docling.document_converter import DocumentConverter
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -26,6 +25,7 @@ class CBCExtractor:
     """
 
     def __init__(self):
+        from docling.document_converter import DocumentConverter
         self.converter = DocumentConverter()
 
         self.llm = ChatOpenAI(

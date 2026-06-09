@@ -1,4 +1,3 @@
-from docling.document_converter import DocumentConverter
 
 
 class DigitalPrescriptionExtractor:
@@ -11,7 +10,7 @@ class DigitalPrescriptionExtractor:
     """
 
     def __init__(self):
-
+        from docling.document_converter import DocumentConverter
         self.converter = DocumentConverter()
 
     def process_document(

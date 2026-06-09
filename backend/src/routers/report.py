@@ -24,7 +24,7 @@ from src.models import (
 from src.ingestion.extractor import BaseExtractor
 from starlette import status
 from .auth import get_current_user, get_db
-from src.rag.shared_resources import vector_store
+from src.rag.shared_resources import get_vector_store
 from src.ingestion.schemas import (
     ApproveReportRequest,
 )
@@ -94,6 +94,8 @@ async def upload_medical_report(
             shutil.copyfileobj(file.file, buffer)
 
         # Extract to markdown ONLY
+        from src.ingestion.extractor import BaseExtractor
+
         extractor = BaseExtractor().get_extractor(report_type)
         result = extractor.process_document(file_path=str(save_path))
 
@@ -314,7 +316,7 @@ async def approve_report(
                 ),
             )
             background_tasks.add_task(
-                vector_store.ingest_docs,
+                get_vector_store().ingest_docs,
                 document_id=str(document.document_id),
                 patient_id=str(document.patient_id),
                 report_type=str(document.report_type),

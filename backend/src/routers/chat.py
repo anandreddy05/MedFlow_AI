@@ -36,11 +36,11 @@ from src.ingestion.schemas import (
 from .auth import get_current_user, get_db
 from src.rag.utils.intent_classifier import RetrieverIntent
 from src.rag.shared_resources import (
-    retriever,
-    latest_retriever,
-    intent_router,
-    langfuse,
-    handler,
+    get_retriever,
+    get_latest_retriever,
+    get_intent_router,
+    get_langfuse,
+    get_handler,
 )
 from src.guardrails.input_router import InputGuard
 from src.guardrails.output_auditor import OutputGuard
@@ -156,7 +156,7 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
             status_code=403, detail="Role not authorized for conversational AI."
         )
 
-    with langfuse.start_as_current_observation(
+    with get_langfuse().start_as_current_observation(
         as_type="span", name="medflow_chat"
     ) as root_span:
         root_span.update(
@@ -172,7 +172,7 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
             user_id=str(role),
             tags=[role],
         ):
-            input_check = InputGuard.verify(request.query, callbacks=[handler])
+            input_check = InputGuard.verify(request.query, callbacks=[get_handler()])
             if not input_check.is_safe:
                 return {
                     "user_query": request.query,
@@ -196,7 +196,7 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
             ]:
                 pass
 
-            intent = intent_router.route_query(request.query)
+            intent = get_intent_router().route_query(request.query)
             if target_collection == "knowledge_base":
                 intent = RetrieverIntent.HISTORICAL
 
@@ -230,12 +230,12 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
                     ),
                 )
             if intent == RetrieverIntent.CURRENT_CONTEXT:
-                latest_docs = latest_retriever.retrieve(
+                latest_docs = get_latest_retriever().retrieve(
                     db=db,
                     patient_id=target_patient_id,
                 )
 
-                context = latest_retriever.build_context(latest_docs)
+                context = get_latest_retriever().build_context(latest_docs)
 
                 retrieved_docs = []
 
@@ -263,7 +263,7 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
                     ),
                 )
 
-                retrieved_docs = retriever.retrieve(
+                retrieved_docs = get_retriever().retrieve(
                     query=request.query,
                     patient_id=target_patient_id,
                     collection_name=target_collection,
@@ -300,7 +300,7 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
                 {"role": "user", "content": anchored_query},
             ]
 
-            final_answer = _invoke_llm(model, messages_for_llm, callbacks=[handler])
+            final_answer = _invoke_llm(model, messages_for_llm, callbacks=[get_handler()])
 
             logger.debug(
                 "Raw LLM output before auditor",
@@ -322,7 +322,7 @@ async def question(user: user_dependency, db: db_dependency, request: ChatReques
                 output_check = OutputGuard.verify(
                     context=context,
                     proposed_answer=final_answer.content,
-                    callbacks=[handler] if handler else None,
+                    callbacks=[get_handler()],
                 )
                 display_text = (
                     final_answer.content
@@ -501,7 +501,7 @@ async def voice_question(
             }
 
     # 4. Pass BOTH variables and the TRANSCRIBED text (user_query) to the retriever
-    retrieved_docs = retriever.retrieve(
+    retrieved_docs = get_retriever().retrieve(
         query=user_query,
         patient_id=target_patient_id,
         collection_name=target_collection,

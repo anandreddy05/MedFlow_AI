@@ -1,6 +1,3 @@
-from docling.document_converter import DocumentConverter
-
-
 class DischargeSummaryExtractor:
     """
     Discharge Summary Extraction Service
@@ -11,6 +8,7 @@ class DischargeSummaryExtractor:
     """
 
     def __init__(self):
+        from docling.document_converter import DocumentConverter
         self.converter = DocumentConverter()
 
     def process_document(self, file_path: str):

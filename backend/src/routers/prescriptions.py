@@ -22,7 +22,7 @@ from src.ingestion.schemas import (
 )
 from starlette import status
 from .auth import get_current_user, get_db
-from src.rag.shared_resources import vector_store
+from src.rag.shared_resources import get_vector_store
 from src.utils.logger import get_logger, log_ctx
 
 load_dotenv(override=True)
@@ -155,7 +155,7 @@ async def create_direct_prescription(
 
         if clinical_data.get("clinical_notes"):
             background_tasks.add_task(
-                vector_store.ingest_docs,
+                get_vector_store().ingest_docs,
                 document_id=str(new_document.document_id),
                 patient_id=str(new_document.patient_id),
                 report_type=str(new_document.report_type),
