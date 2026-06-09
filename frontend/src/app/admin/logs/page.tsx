@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { API_BASE_URL } from '@/lib/api/client';
 import {
   Shield,
   Search,
@@ -69,7 +70,7 @@ export default function AdminAuditLogsPage() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/admin/logs?limit=${limit}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/logs?limit=${limit}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, FileText, Activity, Shield, Clock, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api/client';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch('http://localhost:8000/admin/logs?limit=10', {
+        const response = await fetch(`${API_BASE_URL}/admin/logs?limit=10`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (response.ok) {

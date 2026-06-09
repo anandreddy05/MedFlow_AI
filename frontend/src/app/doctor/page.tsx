@@ -13,6 +13,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface Patient {
   patient_id: string;
@@ -117,7 +118,7 @@ export default function DoctorDashboard() {
           const formData = new FormData();
           formData.append('audio', audioBlob, 'dictation.webm');
 
-          const response = await fetch('http://127.0.0.1:8000/doctor/transcribe', {
+          const response = await fetch(`${API_BASE_URL}/doctor/transcribe`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
@@ -154,7 +155,7 @@ export default function DoctorDashboard() {
     const fetchPatients = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch('http://127.0.0.1:8000/doctor/my-patients', {
+        const response = await fetch(`${API_BASE_URL}/doctor/my-patients`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (response.ok) {
@@ -171,7 +172,7 @@ export default function DoctorDashboard() {
   const fetchPatientDocuments = async (patientId: string) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://127.0.0.1:8000/doctor/patient/${patientId}/full-history`, {
+      const response = await fetch(`${API_BASE_URL}/doctor/patient/${patientId}/full-history`, {
         headers: { 'Authorization': `Bearer ${token}` },
       }); 
       if (response.ok) {
@@ -207,7 +208,7 @@ export default function DoctorDashboard() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/chat', {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -329,7 +330,7 @@ export default function DoctorDashboard() {
         
         console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Debug
         
-        const response = await fetch('http://127.0.0.1:8000/prescriptions/direct', {
+        const response = await fetch(`${API_BASE_URL}/prescriptions/direct`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1086,7 +1087,7 @@ export default function DoctorDashboard() {
             <div className="p-5 border-t flex justify-between items-center">
               {selectedDocument.original_file_path && selectedDocument.original_file_path !== "direct_entry" && (
                 <a 
-                  href={`http://127.0.0.1:8000/documents/${selectedDocument.document_id}/file`}
+                  href={`${API_BASE_URL}/documents/${selectedDocument.document_id}/file`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition flex items-center gap-2 text-sm"

@@ -3,6 +3,7 @@
 import React from "react";
 import { useState, useEffect } from 'react';
 import { UserPlus, Edit, Trash2, Shield, Stethoscope, Briefcase, Building, User } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface AdminUser {
   id: number;
@@ -39,7 +40,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8000/admin/users', {
+      const response = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (response.ok) {
@@ -61,7 +62,7 @@ export default function AdminUsersPage() {
     
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8000/auth/', {
+      const response = await fetch(`${API_BASE_URL}/auth/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

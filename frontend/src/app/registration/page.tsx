@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { API_BASE_URL } from '@/lib/api/client';
 
 export default function RegistrationPage() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function RegistrationPage() {
       setLoadingDoctors(true);
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch('http://localhost:8000/registration/available-doctors', {
+        const response = await fetch(`${API_BASE_URL}/registration/available-doctors`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -92,7 +93,7 @@ export default function RegistrationPage() {
         });
   
         const response = await fetch(
-          `http://localhost:8000/registration/create-patient?${params.toString()}`,
+          `${API_BASE_URL}/registration/create-patient?${params.toString()}`,
           {
             method: 'POST',
             headers: {
@@ -117,7 +118,7 @@ export default function RegistrationPage() {
           role: formData.role,
         };
   
-        const response = await fetch('http://localhost:8000/auth/', {
+        const response = await fetch(`${API_BASE_URL}/auth/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

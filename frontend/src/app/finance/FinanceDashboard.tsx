@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { useReactMediaRecorder } from 'react-media-recorder';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -51,7 +52,7 @@ export default function FinanceDashboard() {
         const formData = new FormData();
         formData.append('audio', blob, 'finance_voice.webm');
 
-        const response = await fetch('http://127.0.0.1:8000/chat/voice', {
+        const response = await fetch(`${API_BASE_URL}/chat/voice`, {
           method: 'POST',
           headers: { 
             'Authorization': `Bearer ${token}` 
@@ -96,7 +97,7 @@ export default function FinanceDashboard() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/chat', {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

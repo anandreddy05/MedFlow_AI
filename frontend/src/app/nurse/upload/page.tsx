@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, File, X, CheckCircle, AlertCircle, Loader2, FileText, Image } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api/client';
 
 const reportTypes = [
   { value: 'cbc', label: 'CBC Report' },
@@ -36,7 +37,7 @@ export default function NurseUploadPage() {
     formData.append('patient_id', patientId);
     formData.append('report_type', reportType);
 
-    const response = await fetch('http://localhost:8000/upload', {
+    const response = await fetch(`${API_BASE_URL}/upload`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

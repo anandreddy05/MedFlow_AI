@@ -12,6 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { useReactMediaRecorder } from 'react-media-recorder';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface Document {
   document_id: string;
@@ -49,7 +50,7 @@ export default function PatientDashboard() {
     const fetchPatientData = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch('http://127.0.0.1:8000/patient/history', {
+        const response = await fetch(`${API_BASE_URL}/patient/history`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (response.ok) {
@@ -83,7 +84,7 @@ export default function PatientDashboard() {
         const formData = new FormData();
         formData.append('audio', blob, 'patient_voice.webm');
 
-        const response = await fetch('http://127.0.0.1:8000/chat/voice', {
+        const response = await fetch(`${API_BASE_URL}/chat/voice`, {
           method: 'POST',
           headers: { 
             'Authorization': `Bearer ${token}` 
@@ -154,7 +155,7 @@ export default function PatientDashboard() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/chat', {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -37,7 +38,7 @@ export default function NursePendingPage() {
   const fetchPendingReports = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8000/reports/pending', {
+      const response = await fetch(`${API_BASE_URL}/reports/pending`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       

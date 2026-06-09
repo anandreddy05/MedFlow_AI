@@ -7,6 +7,7 @@ import {
   Plus, Trash2, Printer, Eye, Calendar,
   User, Stethoscope, AlertCircle, CheckCircle
 } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface Medication {
   id: string;
@@ -46,7 +47,7 @@ function WritePrescriptionContent() {
       if (!patientId) return;
       try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch(`http://localhost:8000/doctor/patient/${patientId}/full-history`, {
+        const response = await fetch(`${API_BASE_URL}/doctor/patient/${patientId}/full-history`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (response.ok) {
@@ -120,7 +121,7 @@ function WritePrescriptionContent() {
         }))
       };
 
-      const response = await fetch('http://localhost:8000/prescriptions/direct', {
+      const response = await fetch(`${API_BASE_URL}/prescriptions/direct`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface User {
     id: number;
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         formData.append('username', credentials.username);
         formData.append('password', credentials.password);
 
-        const response = await fetch('http://localhost:8000/auth/token', {
+        const response = await fetch(`${API_BASE_URL}/auth/token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

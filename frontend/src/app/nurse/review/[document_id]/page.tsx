@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Check, X, FileText, Image as ImageIcon, Edit2, Save, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface CBCResult {
   test_name: string;
@@ -41,7 +42,7 @@ export default function NurseReviewPage() {
   const fetchDocument = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/reports/pending`, {
+      const response = await fetch(`${API_BASE_URL}/reports/pending`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (response.ok) {
@@ -52,7 +53,7 @@ export default function NurseReviewPage() {
         
         // Fetch original file URL
         if (found?.has_original_file) {
-          const fileResponse = await fetch(`http://localhost:8000/documents/${document_id}/file`, {
+          const fileResponse = await fetch(`${API_BASE_URL}/documents/${document_id}/file`, {
             headers: { 'Authorization': `Bearer ${token}` },
           });
           if (fileResponse.ok) {
@@ -73,7 +74,7 @@ export default function NurseReviewPage() {
     setApproving(true);
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8000/reports/approve', {
+      const response = await fetch(`${API_BASE_URL}/reports/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
