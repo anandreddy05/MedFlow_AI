@@ -37,6 +37,8 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
+def ingest_docs_background(**kwargs):
+    get_vector_store().ingest_docs(**kwargs)
 
 @router.post("/prescriptions/direct")
 async def create_direct_prescription(
@@ -154,7 +156,7 @@ async def create_direct_prescription(
 
         if clinical_data.get("clinical_notes"):
             background_tasks.add_task(
-                get_vector_store().ingest_docs,
+                ingest_docs_background,
                 document_id=str(new_document.document_id),
                 patient_id=str(new_document.patient_id),
                 report_type=str(new_document.report_type),

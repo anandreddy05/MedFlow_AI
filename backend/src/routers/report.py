@@ -42,6 +42,8 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
+def ingest_docs_background(**kwargs):
+    get_vector_store().ingest_docs(**kwargs)
 
 @router.post("/upload", tags=["Documents"])
 async def upload_medical_report(
@@ -313,7 +315,7 @@ async def approve_report(
                 ),
             )
             background_tasks.add_task(
-                get_vector_store().ingest_docs,
+                ingest_docs_background,
                 document_id=str(document.document_id),
                 patient_id=str(document.patient_id),
                 report_type=str(document.report_type),
